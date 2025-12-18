@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="categories-container">
+    <h1><i class="fas fa-tags"></i> TIMEFLOW - Quản lý phân loại</h1>
+    <p class="subtitle">Tổ chức công việc của bạn theo các danh mục</p>
+    
+    <section class="categories-section">
+        <h2><i class="fas fa-list"></i> Danh sách phân loại</h2>
+        
+        <div class="categories-list">
+            {% for category in categories %}
+            <div class="category-item" id="category-{{ category.id }}">
+                <div class="category-info">
+                    <input type="checkbox" 
+                           {% if category.is_active %}checked{% endif %}
+                           onchange="toggleCategory({{ category.id }})"
+                           class="category-checkbox">
+                    <span class="category-name">{{ category.name }}</span>
+                </div>
+                <div class="category-actions">
+                    <button class="btn-icon btn-delete" onclick="deleteCategory({{ category.id }})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="add-category-form">
+            <h3><i class="fas fa-plus"></i> Thêm phân loại mới</h3>
+            <div class="input-group">
+                <input type="text" id="newCategoryName" 
+                       placeholder="Nhập tên phân loại mới">
+                <button class="btn-primary" onclick="addCategory()">
+                    <i class="fas fa-plus"></i> Thêm
+                </button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+function addCategory() {
+    const name = document.getElementById('newCategoryName').value;
+    if (!name.trim()) {
+        alert('Vui lòng nhập tên phân loại');
+        return;
+    }
+    
+    fetch('/add_category', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `name=${encodeURIComponent(name)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Add new category to list
+            const categoriesList = document.querySelector('.categories-list');
+            const newCategory = document.createElement('div');
+            newCategory.className = 'category-item';
+            newCategory.id = `category-${data.id}`;
+            newCategory.innerHTML = `
+                <div class="category-info">
+                    <input type="checkbox" checked 
+                           onchange="toggleCategory(${data.id})"
+                           class="category-checkbox">
+                    <span class="category-name">${name}</span>
+                </div>
+                <div class="category-actions">
+                    <button class="btn-icon btn-delete" onclick="deleteCategory(${data.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            categoriesList.appendChild(newCategory);
+            
+            // Clear input
+            document.getElementById('newCategoryName').value = '';
+        } else {
+            alert('Có lỗi xảy ra: ' + data.error);
+        }
+    });
+}
+
+function toggleCategory(categoryId) {
+    fetch(`/toggle_category/${categoryId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            alert('Có lỗi xảy ra khi cập nhật phân loại');
+        }
+    });
+}
+
+function deleteCategory(categoryId) {
+    if (!confirm('Bạn có chắc chắn muốn xóa phân loại này?')) {
+        return;
+    }
+    
+    fetch(`/delete_category/${categoryId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`category-${categoryId}`).remove();
+        }
+    });
+}
+</script>
+{% endblock %}

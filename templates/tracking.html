@@ -1,0 +1,159 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="tracking-container">
+    <h1><i class="fas fa-chart-line"></i> TIMEFLOW - Theo dõi công việc</h1>
+    <p class="subtitle">Quản lý và theo dõi tiến độ tất cả công việc</p>
+    
+    <div class="stats-grid">
+        <div class="stat-card stat-not-started">
+            <h3>Tổng công việc chưa làm</h3>
+            <div class="stat-number">{{ not_started_count }}</div>
+        </div>
+        
+        <div class="stat-card stat-in-progress">
+            <h3>Tổng công việc đang làm</h3>
+            <div class="stat-number">{{ in_progress_count }}</div>
+        </div>
+        
+        <div class="stat-card stat-completed">
+            <h3>Tổng công việc hoàn thành</h3>
+            <div class="stat-number">{{ completed_count }}</div>
+        </div>
+    </div>
+    
+    <section class="tasks-table-section">
+        <h2><i class="fas fa-tasks"></i> Tất cả công việc</h2>
+        
+        <div class="table-responsive">
+            <table class="tasks-table">
+                <thead>
+                    <tr>
+                        <th>Công việc</th>
+                        <th>Phân loại</th>
+                        <th>Ngày tạo</th>
+                        <th>Hạn hoàn thành</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr>
+                        <td>
+                            <strong>{{ task.name }}</strong>
+                            <p class="task-description">{{ task.description }}</p>
+                        </td>
+                        <td>
+                            <span class="category-label">{{ task.category.name }}</span>
+                        </td>
+                        <td>{{ task.created_at.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            {{ task.due_date.strftime('%d/%m/%Y') }}
+                            {% if task.due_time %}
+                            <br><small>{{ task.due_time.strftime('%H:%M') }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <select class="status-select" 
+                                    data-task-id="{{ task.id }}"
+                                    onchange="updateTaskStatus(this)">
+                                <option value="Chưa làm" {% if task.status == 'Chưa làm' %}selected{% endif %}>
+                                    Chưa làm
+                                </option>
+                                <option value="Đang làm" {% if task.status == 'Đang làm' %}selected{% endif %}>
+                                    Đang làm
+                                </option>
+                                <option value="Hoàn thành" {% if task.status == 'Hoàn thành' %}selected{% endif %}>
+                                    Hoàn thành
+                                </option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn-icon btn-danger" 
+                                    onclick="deleteTask({{ task.id }})">
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            <p class="empty-message">Không có công việc nào</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="filter-section">
+            <h3><i class="fas fa-filter"></i> Lọc theo phân loại</h3>
+            <div class="filter-buttons">
+                <button class="btn-filter active" data-category="all">Tất cả</button>
+                {% for category in categories %}
+                <button class="btn-filter" data-category="{{ category.id }}">
+                    {{ category.name }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+function updateTaskStatus(selectElement) {
+    const taskId = selectElement.dataset.taskId;
+    const newStatus = selectElement.value;
+    
+    fetch(`/update_task_status/${taskId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `status=${newStatus}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Cập nhật trạng thái thành công!', 'success');
+            location.reload();
+        } else {
+            showNotification('Có lỗi xảy ra!', 'error');
+        }
+    });
+}
+
+function deleteTask(taskId) {
+    if (!confirm('Bạn có chắc chắn muốn xóa công việc này?')) {
+        return;
+    }
+    
+    fetch(`/delete_task/${taskId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Xóa công việc thành công!', 'success');
+            location.reload();
+        }
+    });
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

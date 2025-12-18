@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIMEFLOW - Quản lý thời gian</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-brand">TIMEFLOW</a>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+                    <i class="fas fa-home"></i> Trang chính
+                </a>
+                <a href="{{ url_for('tasks.create_task') }}" class="nav-link {% if request.endpoint == 'tasks.create_task' %}active{% endif %}">
+                    <i class="fas fa-plus"></i> Tạo công việc
+                </a>
+                <a href="{{ url_for('categories.manage_categories') }}" class="nav-link {% if request.endpoint == 'categories.manage_categories' %}active{% endif %}">
+                    <i class="fas fa-tags"></i> Phân loại
+                </a>
+                <a href="{{ url_for('tracking.tracking') }}" class="nav-link {% if request.endpoint == 'tracking.tracking' %}active{% endif %}">
+                    <i class="fas fa-chart-line"></i> Theo dõi
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <main class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert-container">
+                    {% for message in messages %}
+                        <div class="alert">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

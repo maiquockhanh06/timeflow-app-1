@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="home-container">
+    <header class="welcome-header">
+        <h1><i class="fas fa-calendar-alt"></i> Trang chính</h1>
+        <p class="welcome-text">Chào mừng trở lại TIMEFLOW! Đây là công việc của bạn hôm nay.</p>
+    </header>
+    
+    <div class="tasks-grid">
+        <section class="task-section not-started">
+            <h2><i class="far fa-clock"></i> Chưa làm</h2>
+            <div class="task-count">{{ not_started|length }}</div>
+            
+            <div class="task-list">
+                {% for task in not_started %}
+                <div class="task-card">
+                    <h3>{{ task.name }}</h3>
+                    <p>{{ task.description }}</p>
+                    <div class="task-meta">
+                        <span class="category-badge">{{ task.category.name }}</span>
+                        <span class="due-date">Hạn: {{ task.due_date.strftime('%d/%m/%Y') }}</span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn-start" onclick="updateTaskStatus({{ task.id }}, 'Đang làm')">
+                            <i class="fas fa-play"></i> Bắt đầu
+                        </button>
+                    </div>
+                </div>
+                {% else %}
+                <p class="empty-message">Không có công việc nào chưa làm</p>
+                {% endfor %}
+            </div>
+        </section>
+        
+        <section class="task-section today">
+            <h2><i class="fas fa-calendar-day"></i> Công việc hôm nay</h2>
+            <p class="date">{{ today.strftime('%d/%m/%Y') }}</p>
+            
+            <div class="task-list">
+                {% for task in tasks_today %}
+                <div class="task-card">
+                    <h3>{{ task.name }}</h3>
+                    <p>{{ task.description }}</p>
+                    <div class="task-meta">
+                        <span class="category-badge">{{ task.category.name }}</span>
+                        <span class="due-time">
+                            {% if task.due_time %}
+                            <i class="fas fa-clock"></i> {{ task.due_time.strftime('%H:%M') }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="task-status">
+                        <span class="status-badge status-{{ task.status|lower|replace(' ', '-') }}">
+                            {{ task.status }}
+                        </span>
+                    </div>
+                    <div class="task-actions">
+                        {% if task.status != 'Hoàn thành' %}
+                        <button class="btn-complete" onclick="updateTaskStatus({{ task.id }}, 'Hoàn thành')">
+                            <i class="fas fa-check"></i> Hoàn thành
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <p class="empty-message">Không có công việc nào cho hôm nay</p>
+                {% endfor %}
+            </div>
+            
+            <div class="quick-actions">
+                <a href="{{ url_for('tasks.create_task') }}" class="btn-primary">
+                    <i class="fas fa-plus"></i> Tạo công việc mới
+                </a>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+function updateTaskStatus(taskId, status) {
+    fetch(`/update_task_status/${taskId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `status=${status}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}
