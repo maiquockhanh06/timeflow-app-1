@@ -1,33 +1,18 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-.venv/
-env.bak/
-venv.bak/
-
-# Database
-instance/
-*.db
-*.sqlite3
-
-# Flask
-*.log
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Temporary files
-*.tmp
-*.temp
+# Tạo file .gitignore
+echo # Python > .gitignore
+echo __pycache__/ >> .gitignore
+echo *.pyc >> .gitignore
+echo *.pyo >> .gitignore
+echo *.pyd >> .gitignore
+echo .Python >> .gitignore
+echo env/ >> .gitignore
+echo venv/ >> .gitignore
+echo .venv/ >> .gitignore
+echo >> .gitignore
+echo # Database >> .gitignore
+echo instance/ >> .gitignore
+echo *.db >> .gitignore
+echo *.sqlite3 >> .gitignore
+echo >> .gitignore
+echo # Logs >> .gitignore
+echo *.log >> .gitignore
