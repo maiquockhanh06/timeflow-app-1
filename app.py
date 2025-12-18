@@ -124,5 +124,9 @@ app.register_blueprint(tasks_bp)
 app.register_blueprint(categories_bp)
 app.register_blueprint(tracking_bp)
 
+import os
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    port = int(os.environ.get('PORT', 5001))
+    debug = os.environ.get('FLASK_ENV') == 'development'
+    app.run(host='0.0.0.0', port=port, debug=debug)
