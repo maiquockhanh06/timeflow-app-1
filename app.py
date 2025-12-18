@@ -125,4 +125,6 @@ app.register_blueprint(categories_bp)
 app.register_blueprint(tracking_bp)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    # Khi chạy local vẫn debug, khi deploy sẽ tự tắt
+    debug_mode = os.environ.get('FLASK_ENV') == 'development'
+    app.run(debug=debug_mode, host='0.0.0.0', port=5001)
